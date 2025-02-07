@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+
+  <!-- Element Code -->
+  <style>
+    .tox-tinymce-aux {
+      z-index: 2003 !important;
+    }
+
+    div.tox.tox-tinymce {
+      height: 100% !important
+    }
+  </style>
+
+  <script id='TineMCE-plugin'>
+    var editorCount = 0;
+
+    function loadEditor(el_height, cssStyle, editorId, callback) {
+
+      if (!imagePicker) {
+        console.log("imagePicker não definida!");
+      }
+
+      tinymce.init({
+        selector: `textarea#editor-${editorId}`,
+        content_style: cssStyle,
+        plugins: [
+          // Core editing features
+          'paste', 'code', 'fullscreen', 'image', 'imagetools', 'lists', 'link', 'table', 'media', 'hr', 'searchreplace', 'quickbars', 'visualblocks', 'wordcount',
+          // Additional plugins from the second configuration
+          'emoticons', 'checklist', 'advcode'
+        ],
+        menubar: false, // Hide top menu bar (from the second configuration)
+        height: el_height,
+        relative_urls: false,
+        resize: false,
+        block_formats: 'Paragraph=p; Header 2=h2; Header 3=h3',
+        toolbar: 'undo redo | blocks | bold italic moreFormatting | textAlignment | forecolor backcolor | bullist numlist outdent indent | checklist link image emoticons table quicktable | insertfile | insertElements | code | fullscreen | hr | searchreplace | visualblocks | wordcount',
+        toolbar_groups: {
+          moreFormatting: {
+            icon: 'image-options',
+            tooltip: 'More formatting',
+            items: 'underline strikethrough code subscript superscript removeformat'
+          },
+          textAlignment: {
+            icon: 'accordion',
+            tooltip: 'Text alignment',
+            items: 'alignleft aligncenter alignright'
+          },
+          insertElements: {
+            icon: 'addtag',
+            tooltip: 'Insert elements / ',
+            items: 'searchreplace'
+          },
+        },
+        quickbars_selection_toolbar: 'bold italic underline | formatselect | forecolor backcolor | bullist numlist | blockquote quicklink hr',
+        quickbars_insert_toolbar: 'quickimage quicklink quicktable',
+        imagetools_toolbar: 'rotateleft rotateright | flipv fliph | editimage imageoptions remove',
+        table_toolbar: 'tableprops tablemergecells tablesplitcells | tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
+        contextmenu: false,
+        browser_spellcheck: true,
+        image_title: true,
+        automatic_uploads: true,
+        file_picker_types: 'image',
+        file_picker_callback: imagePicker,
+        init_instance_callback: callback
+      });
+
+      function imagePicker(cb, value, meta) {
+        var input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+
+        /*
+            Note: In modern browsers input[type="file"] is functional without
+            even adding it to the DOM, but that might not be the case in some older
+            or quirky browsers like IE, so you might want to add it to the DOM
+            just in case, and visually hide it. And do not forget do remove it
+            once you do not need it anymore.
+            */
+
+        input.onchange = function() {
+          var file = this.files[0];
+
+          var reader = new FileReader();
+          reader.onload = function() {
+            /*
+                Note: Now we need to register the blob in TinyMCEs image blob
+                registry. In the next release this part hopefully won't be
+                necessary, as we are looking to handle it internally.
+                */
+            var id = 'blobid' + (new Date()).getTime();
+            var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+            console.log(reader.result);
+            var base64 = reader.result.split(',')[1];
+            var blobInfo = blobCache.create(id, file, base64);
+            blobCache.add(blobInfo);
+
+            /* call the callback and populate the Title field with the file name */
+            cb(blobInfo.blobUri(), {
+              title: file.name
+            });
+          };
+          reader.readAsDataURL(file);
+          console.log(file);
+
+          /*
+              File { name: "blogging.png", lastModified: 1621983926220, webkitRelativePath: "", size: 5917, type: "image/png" }
+              */
+        };
+
+        input.click();
+      }
+    }
+
+    // Initialize
+    function Initialize(instance, context) {
+
+      var div = instance.canvas;
+
+      // Give an Id to the editor (necessary for Repeating Groups)
+      instance.data.editorId = editorCount;
+      editorCount++;
+
+      // Insert container on the page
+      div.append(`<textarea id="editor-${instance.data.editorId}" class="html-editor-plugin-wysiwyg" disabled></textarea>`);
+
+      //console.log(`Bubble: Initialize ${instance.data.editorId}!`)
+    }
+
+    // Update
+    function Update(instance, properties, context) {
+
+      // Storing styles defined by the user in the bubble element editor
+      var CSS_Styles = `
+    .mce-content-body {
+        font-family: ${properties.bubble.font_face().replace(/:(.*)/g,"")} !important;
+        font-size: ${properties.bubble.font_size()}px !important;
+        line-height: ${properties.line_height} !important;
+        overflow-wrap: break-word;
+    }
+    .mce-content-body p {
+        margin-bottom: ${properties.paragraph_margin}em;
+    }
+    .mce-content-body td, .mce-content-body th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+    .mce-content-body tr:first-child {
+        background-color: ${properties.table_first_row_background};
+        color: ${properties.table_first_row_text};
+    }
+    .mce-content-body tr:first-child:hover {
+        background-color: ${properties.table_first_row_background} !important;
+    }
+    .mce-content-body tr:hover {
+           background-color: #f2f2f2;
+    }
+    .mce-content-body a {
+        color: ${properties.link_colors};
+    }
+    .mce-content-body h2 {
+        font-size: ${properties.h2_tag_size}em;
+        color: ${properties.h2_tag_color};
+    }
+    .mce-content-body h3 {
+        font-size: ${properties.h3_tag_size}em;
+        color: ${properties.h3_tag_color};
+    }
+    .mce-content-body h2, .mce-content-body h3 {
+        font-weight: bold;
+        margin-top: 1em;
+        margin-bottom: 1em;
+    }
+    .mce-content-body img {
+        max-width: 100%;
+        height: auto;
+    }
+    `
+
+      // Create instance of TinyMCE
+      let element_height = $(`textarea#editor-${instance.data.editorId}`).parent().height();
+      if (tinyMCE.editors[instance.data.editorId] == undefined) {
+        loadEditor(element_height,
+          CSS_Styles,
+          instance.data.editorId,
+          function(editor) {
+
+            // Set what happens when the user edits the content
+            editor.on('Change', function(e) {
+
+              let updatedValue = `
+            <style>
+            .html-editor-plugin-content {
+            font-family: ${properties.bubble.font_face().replace(/:(.*)/g,"")} !important;
+            font-size: ${properties.bubble.font_size()}px !important;
+            line-height: ${properties.line_height} !important;
+            overflow-wrap: break-word;
+            }
+            .html-editor-plugin-content p {
+            margin-bottom: ${properties.paragraph_margin}em;
+            }
+            .html-editor-plugin-content td, .html-editor-plugin-content th {
+            border: 1px solid #ddd;
+            padding: 8px;
+            }
+            .html-editor-plugin-content tr:first-child {
+            background-color: ${properties.table_first_row_background};
+            color: ${properties.table_first_row_text};
+            }
+            .html-editor-plugin-content tr:first-child:hover {
+            background-color: ${properties.table_first_row_background} !important;
+            }
+            .html-editor-plugin-content tr:hover {
+            background-color: #f2f2f2;
+            }
+            .html-editor-plugin-content a {
+            color: ${properties.link_colors};
+            }
+            .html-editor-plugin-content h2 {
+            font-size: ${properties.h2_tag_size}em;
+            color: ${properties.h2_tag_color};
+            }
+            .html-editor-plugin-content h3 {
+            font-size: ${properties.h3_tag_size}em;
+            color: ${properties.h3_tag_color};
+            }
+            .html-editor-plugin-content h2, .html-editor-plugin-content h3 {
+            font-weight: bold;
+            margin-top: 1em;
+            margin-bottom: 1em;
+            }
+            .html-editor-plugin-content img {
+            max-width: 100%;
+            height: auto;
+            }
+            </style>
+            <article class="html-editor-plugin-content">
+            ${editor.getContent()}
+            </article><br>`
+
+              instance.publishState("value", updatedValue)
+              // instance.publishAutobinding(updatedValue)
+
+              instance.triggerEvent('html_tinemce_editor_is_changed', function(err) {
+                console.log(err)
+              })
+              //console.log('TinyMCE: updated!');
+            });
+
+            // Set the initial content of the editor, given by the app admin
+            editor.save() // saving the initial_content in the textarea input, as a backup
+            //console.log("TinyMCE: HTML editor loaded!");
+          }
+        );
+
+      }
+
+      // Extracting the content for the editor
+      if (properties.autobinding != null) {
+        // autobinding has preference over initial_content
+        if (properties.autobinding.indexOf(
+            '<article class="html-editor-plugin-content">') !== -1) {
+          var start_pos = properties.autobinding.indexOf('<article class="html-editor-plugin-content">') + '<article class="html-editor-plugin-content">'.length;
+          var end_pos = properties.autobinding.indexOf('</article>', start_pos);
+          var text_to_get = properties.autobinding.substring(start_pos, end_pos);
+        } else {
+          var text_to_get = properties.autobinding
+        }
+
+        $(`textarea#editor-${instance.data.editorId}`).val(text_to_get);
+        instance.publishState("value", properties.autobinding);
+      } else if (properties.initial_content != null) {
+        // Use the initial_content value, if there is no autobinding
+        if (properties.initial_content.indexOf(
+            '<article class="html-editor-plugin-content">') !== -1) {
+          var start_pos = properties.initial_content.indexOf('<article class="html-editor-plugin-content">') + '<article class="html-editor-plugin-content">'.length;
+          var end_pos = properties.initial_content.indexOf('</article>', start_pos);
+          var text_to_get = properties.initial_content.substring(start_pos, end_pos);
+        } else {
+          var text_to_get = properties.initial_content
+        }
+
+        $(`textarea#editor-${instance.data.editorId}`).val(text_to_get);
+        instance.publishState("value", properties.initial_content);
+      } else {
+        // do nothing
+      }
+
+      if (tinyMCE.editors[instance.data.editorId] != undefined) {
+        // Update element with new data
+        tinyMCE.editors[instance.data.editorId].load()
+      }
+      //console.log(`Bubble: Updated editor ${instance.data.editorId}!`)
+
+    }
+
+    // Preview
+    function Preview(instance, properties) {
+
+      var div = instance.canvas;
+
+      div.css("background-color", "#F7F7F7")
+
+      // Insert container on the page
+      div.append('<div>The blog post editor will come here</div>');
+
+    }
+
+    // Reset
+    function Reset(instance, context) {
+
+      if (tinyMCE.editors[instance.data.editorId] != undefined) {
+        // loading the initial content present in the textarea backup
+        tinyMCE.editors[instance.data.editorId].load()
+        instance.publishState("value", tinyMCE.editors[instance.data.editorId].getContent())
+      }
+      //console.log(`Bubble: Reset editor ${instance.data.editorId}!`)
+
+    }
+  </script>
+
+</body>
+
+</html>
