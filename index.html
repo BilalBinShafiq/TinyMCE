@@ -1,55 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+    <!-- Place the first <script> tag in your HTML's <head> -->
+    <script
+      src="https://cdn.tiny.cloud/1/tvxtmwjmntcbw8lkf2l2k9gwnfmppkz7kznp4jjr3qg9cvke/tinymce/7/tinymce.min.js"
+      referrerpolicy="origin"
+    ></script>
+  </head>
 
-  <!-- Place the first <script> tag in your HTML's <head> -->
-  <script src="https://cdn.tiny.cloud/1/tvxtmwjmntcbw8lkf2l2k9gwnfmppkz7kznp4jjr3qg9cvke/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-
-</head>
-
-<body>
-
-  <!-- Place the following <script> and <textarea> tags your HTML's <body> -->
-  <script>
-    tinymce.init({
-      menubar: false, // Hide top menu bar
-      selector: 'textarea',
-      plugins: [
-        // Core editing features
-        'lists', 'link', 'image', 'emoticons', 'table', 'searchreplace',
-        // Your account includes a free trial of TinyMCE premium features
-        // Try the most popular premium features until Feb 11, 2025:
-        'checklist', 'advcode',
-      ],
-      toolbar: 'undo redo | blocks | bold italic moreFormatting | textAlignment | forecolor backcolor | bullist numlist outdent indent | checklist link image emoticons table quicktable | insertfile | insertElements',
-      toolbar_groups: {
-        moreFormatting: {
-          icon: 'image-options',
-          tooltip: 'More formatting',
-          items: 'underline strikethrough code subscript superscript removeformat'
+  <body>
+    <!-- Place the following <script> and <textarea> tags your HTML's <body> -->
+    <script>
+      tinymce.init({
+        menubar: false, // Hide top menu bar
+        selector: "textarea",
+        plugins: [
+          // Core editing features
+          "lists",
+          "link",
+          "image",
+          "emoticons",
+          "table",
+          "searchreplace",
+          // Your account includes a free trial of TinyMCE premium features
+          // Try the most popular premium features until Feb 11, 2025:
+          "checklist",
+          "advcode",
+        ],
+        toolbar1: "btnNewTemplate",
+        toolbar2:
+          "undo redo | blocks | bold italic moreFormatting | textAlignment | forecolor backcolor | bullist numlist outdent indent | checklist link image emoticons table quicktable | insertfile | insertElements | btnSaveTeamplate btnSaveAs",
+        setup: (editor) => {
+          editor.ui.registry.addButton("btnNewTemplate", {
+            text: "New Template",
+            onAction: (_) =>
+              editor.insertContent(`&nbsp;<strong>New Tempalte</strong>&nbsp;`),
+          });
+          editor.ui.registry.addButton("btnSaveTeamplate", {
+            text: "Save Teamplate",
+            tooltip: "Save this teamplate",
+            onAction: (_) =>
+              editor.setContent(
+                `&nbsp;<strong>Save this teamplate</strong>&nbsp;`
+              ),
+          });
+          editor.ui.registry.addButton("btnSaveAs", {
+            text: "Save As",
+            tooltip: "Save this teamplate as new Teamplate",
+            onAction: (_) =>
+              editor.insertContent(
+                `&nbsp;<strong>Save this teamplate as new Teamplate</strong>&nbsp;`
+              ),
+          });
         },
-        textAlignment: {
-          icon: 'accordion',
-          tooltip: 'Text alignment',
-          items: 'alignleft aligncenter alignright'
+        toolbar_groups: {
+          moreFormatting: {
+            icon: "image-options",
+            tooltip: "More formatting",
+            items:
+              "underline strikethrough code subscript superscript removeformat",
+          },
+          textAlignment: {
+            icon: "accordion",
+            tooltip: "Text alignment",
+            items: "alignleft aligncenter alignright",
+          },
+          insertElements: {
+            icon: "addtag",
+            tooltip: "Insert elements / ",
+            items: "searchreplace",
+          },
         },
-        insertElements: {
-          icon: 'addtag',
-          tooltip: 'Insert elements / ',
-          items: 'searchreplace'
-        },
-      },
-    });
-  </script>
+        content_style:
+          "body { font-family:Helvetica,Arial,sans-serif; font-size:16px }",
+      });
+    </script>
 
-  <textarea>
+    <textarea>
   Welcome to TinyMCE!
-</textarea>
-
-</body>
-
+</textarea
+    >
+  </body>
 </html>
