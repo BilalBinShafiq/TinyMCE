@@ -168,7 +168,6 @@ function Update(instance, properties, context) {
     //  * @param {Object} data - The Bubble "anything with value" type field.
     //  * @param {string} property - The property to extract values from.
     //  * @returns {Array} - A list of values for the specified property.
-
     function extractValuesFromBubbleData(data, property) {
         // Ensure data is valid and has the get method
         if (!data || typeof data.get !== "function") {
@@ -224,7 +223,7 @@ function Update(instance, properties, context) {
     tinymce.init({
         menubar: false, // Hide top menu bar
         selector: `#${editorID}`,
-        // selector: "textarea",
+        height: 600,
         plugins: [
             // Core editing features
             "lists",
@@ -239,12 +238,11 @@ function Update(instance, properties, context) {
             "advcode",
             "preview",
             "emoticons",
-            "codesample",
-            "fullscreen",
         ],
+        advcode_prettify_editor: true, // default value
         toolbar1: "btnNewTemplate ddlPreDefinedTemplates",
         toolbar2: "ddlMySpaces ddlMyTemplates | btnSaveTemplate | btnSaveAs",
-        toolbar3: "preview emoticons | undo redo | blocks | bold italic moreFormatting | textAlignment | forecolor backcolor | bullist numlist outdent indent | checklist link image emoticons table quicktable | insertfile | insertElements | fullscreen",
+        toolbar3: "preview emoticons | undo redo | blocks | bold italic moreFormatting | textAlignment | forecolor backcolor | bullist numlist outdent indent | checklist link image emoticons table quicktable | insertfile | insertElements | code",
         // mobile: {'preview emoticons',},
         // mobile: {
         //   plugins: 'preview powerpaste casechange importcss tinydrive searchreplace autolink autosave save directionality advcode visualblocks visualchars fullscreen image link math media mediaembed codesample table charmap pagebreak nonbreaking anchor tableofcontents insertdatetime advlist lists checklist wordcount tinymcespellchecker a11ychecker help formatpainter pageembed charmap mentions quickbars linkchecker emoticons advtable footnotes mergetags autocorrect typography advtemplate',
@@ -414,10 +412,8 @@ function Update(instance, properties, context) {
                 tooltip: "Save this template",
                 height: 300,
                 width: "100%",
-                enabled: true, // button is active when the dialog opens
+                enabled: true,
                 onAction: () => {
-                    editor.ui.registry.getAll().buttons.btnnewtemplate.enabled = false;
-                    editor.ui.registry.getAll().buttons.ddlmyspaces.enabled = false;
                     instance.triggerEvent("btnsavetemplate_is_clicked", {});
                 }
             });
@@ -425,8 +421,10 @@ function Update(instance, properties, context) {
             editor.ui.registry.addButton("btnSaveAs", {
                 text: "Save As",
                 tooltip: "Save this template as new Template",
+                height: 300,
+                width: "100%",
+                enabled: true,
                 onAction: () => {
-                    console.log("btnsaveas_is_clicked event triggered");
                     instance.triggerEvent("btnsaveas_is_clicked", {});
                 }
             });
