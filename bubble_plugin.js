@@ -109,7 +109,6 @@ const properties = {
             }
         ].slice(start, end)
     },
-    confluence_domain: "https://example.atlassian.net", // Example input property
     editor_content: "<p>Sample content</p>", // Example editor content
 };
 
@@ -205,7 +204,7 @@ function Update(instance, properties, context) {
     }
 
     function resetExposedStates() {
-        instance.publishState("selected_my_space_ideditor_content", "");
+        instance.publishState("editor_content", "");
         instance.publishState("selected_predefined_template_id", "");
         instance.publishState("selected_my_space_id", "");
     }
@@ -379,26 +378,26 @@ function Update(instance, properties, context) {
 
                         // Extract list from Bubble's "anything" type with list of value
                         const mt = properties.my_templates;
-                        const titles_mt = extractValuesFromBubbleData(pt, "title");
-                        const bodies_mt = extractValuesFromBubbleData(pt, "body.storage.value");
-                        const ids_mt = extractValuesFromBubbleData(pt, "id");
+                        const titles_mt = extractValuesFromBubbleData(mt, "title");
+                        const bodies_mt = extractValuesFromBubbleData(mt, "body.storage.value");
+                        const ids_mt = extractValuesFromBubbleData(mt, "id");
 
-                        if (validateExtractedData(titles_pt.length, bodies_pt.length)) {
+                        if (validateExtractedData(titles_mt.length, bodies_mt.length)) {
                             callback([]);
                             return;
                         }
 
                         // Ensure both lists have the same length
-                        const length = Math.min(titles_pt.length, bodies_pt.length);
+                        const length = Math.min(titles_mt.length, bodies_mt.length);
                         const items = Array.from({
                             length
                         }, (_, i) => ({
                             type: 'menuitem',
-                            text: titles_pt[i], // Dropdown text
+                            text: titles_mt[i], // Dropdown text
                             onAction: () => {
-                                const normalString = jsonSafeToNormalString(bodies_pt[i]); // Convert to normal string
+                                const normalString = jsonSafeToNormalString(bodies_mt[i]); // Convert to normal string
                                 editor.setContent(normalString); // Set the cleaned content
-                                instance.publishState("selected_predefined_template_id", ids_pt[i]);
+                                instance.publishState("selected_predefined_template_id", ids_mt[i]);
                             }
                         }));
 
@@ -419,7 +418,6 @@ function Update(instance, properties, context) {
                 onAction: () => {
                     editor.ui.registry.getAll().buttons.btnnewtemplate.enabled = false;
                     editor.ui.registry.getAll().buttons.ddlmyspaces.enabled = false;
-                    instance.publishState("testing_state", editor.getContent());
                     instance.triggerEvent("btnsavetemplate_is_clicked", {});
                 }
             });
